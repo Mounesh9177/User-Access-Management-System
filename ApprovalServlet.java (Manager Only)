@@ -1,0 +1,37 @@
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+@WebServlet("/ApprovalServlet")
+public class ApprovalServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+
+        if ("Manager".equals(role)) {
+            int requestId = Integer.parseInt(request.getParameter("requestId"));
+            String status = request.getParameter("status");
+
+            try (Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/your_database", "your_user", "your_password")) {
+                String sql = "UPDATE requests SET status = ? WHERE id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setString(1, status);
+                statement.setInt(2, requestId);
+
+                statement.executeUpdate();
+                response.sendRedirect("pendingRequests.jsp?status=updated");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            response.sendRedirect("login.jsp");
+        }
+    }
+}
