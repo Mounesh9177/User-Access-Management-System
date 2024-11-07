@@ -1,0 +1,25 @@
+-- Create users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    role VARCHAR(10) CHECK (role IN ('Employee', 'Manager', 'Admin')) NOT NULL
+);
+
+-- Create software table
+CREATE TABLE software (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    access_levels VARCHAR(50) CHECK (access_levels IN ('Read', 'Write', 'Admin'))
+);
+
+-- Create requests table
+CREATE TABLE requests (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    software_id INTEGER REFERENCES software(id),
+    access_type VARCHAR(10) CHECK (access_type IN ('Read', 'Write', 'Admin')),
+    reason TEXT,
+    status VARCHAR(10) CHECK (status IN ('Pending', 'Approved', 'Rejected')) DEFAULT 'Pending'
+);
